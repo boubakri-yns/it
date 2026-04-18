@@ -51,13 +51,13 @@ export function formatLabel(value) {
 
 export function formatMoney(value) {
   const amount = Number(value || 0);
-  return `${amount.toFixed(2)} EUR`;
+  return `${amount.toFixed(2)} MAD`;
 }
 
 export function statusTone(value) {
-  const success = ['delivered', 'livree', 'served', 'confirmed', 'completed', 'paid', 'libre'];
+  const success = ['delivered', 'livree', 'served', 'completed', 'paid', 'libre'];
   const danger = ['cancelled', 'indisponible'];
-  const warm = ['ready', 'in_preparation', 'out_for_delivery', 'arrived', 'prise_en_charge', 'livraison_commencee', 'arrive_a_destination', 'reservee', 'occupee', 'pending'];
+  const warm = ['ready', 'in_preparation', 'out_for_delivery', 'arrived', 'prise_en_charge', 'livraison_commencee', 'arrive_a_destination', 'reservee', 'occupee', 'pending', 'confirmed'];
 
   if (success.includes(value)) return 'success';
   if (danger.includes(value)) return 'danger';

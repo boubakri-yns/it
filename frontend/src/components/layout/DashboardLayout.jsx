@@ -1,9 +1,9 @@
-import { Link, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 
 const navByRole = {
   client: [
-    { to: '/client', label: 'Dashboard' },
+    { to: '/client', label: 'Vue d ensemble' },
     { to: '/client/profil', label: 'Profil' },
     { to: '/client/commandes', label: 'Commandes' },
     { to: '/client/reservations', label: 'Reservations' },
@@ -14,43 +14,47 @@ const navByRole = {
     { to: '/cook/history', label: 'Historique' },
   ],
   delivery: [
-    { to: '/delivery', label: 'Dashboard' },
-    { to: '/delivery/available', label: 'Disponibles' },
-    { to: '/delivery/active', label: 'Actives' },
-    { to: '/delivery/detail', label: 'Detail mission' },
+    { to: '/delivery', label: 'Vue d ensemble' },
+    { to: '/delivery/available', label: 'A prendre' },
+    { to: '/delivery/detail', label: 'Mission detail' },
     { to: '/delivery/history', label: 'Historique' },
   ],
   server: [
-    { to: '/server', label: 'Dashboard' },
-    { to: '/server/reservations', label: 'Reservations' },
-    { to: '/server/tables', label: 'Tables' },
-    { to: '/server/ready', label: 'Pretes a servir' },
-    { to: '/server/onsite', label: 'Commandes sur place' },
+    { to: '/server', label: 'Vue d ensemble' },
+    { to: '/server/reservations', label: 'Accueil clients' },
+    { to: '/server/tables', label: 'Plan de salle' },
+    { to: '/server/ready', label: 'Passe cuisine' },
+    { to: '/server/onsite', label: 'Prise de commande' },
   ],
   admin: [
-    { to: '/admin', label: 'Dashboard' },
+    { to: '/admin', label: 'Vue d ensemble' },
     { to: '/admin/users', label: 'Utilisateurs' },
-    { to: '/admin/categories', label: 'Categories' },
-    { to: '/admin/products', label: 'Plats' },
-    { to: '/admin/tables', label: 'Tables' },
-    { to: '/admin/reservations', label: 'Reservations' },
+    { to: '/admin/products', label: 'Catalogue' },
     { to: '/admin/orders', label: 'Commandes' },
-    { to: '/admin/payments', label: 'Paiements' },
-    { to: '/admin/deliveries', label: 'Livraisons' },
-    { to: '/admin/stats', label: 'Statistiques' },
+    { to: '/admin/reservations', label: 'Reservations' },
     { to: '/admin/settings', label: 'Parametres' },
-    { to: '/admin/logs', label: 'Logs' },
   ],
 };
 
 export default function DashboardLayout() {
   const { user, logout } = useAuth();
   const nav = navByRole[user?.role] || [];
+  const roleTitle =
+    user?.role === 'client'
+      ? 'Espace client'
+      : user?.role === 'delivery'
+        ? 'Espace livraison'
+      : user?.role === 'server'
+          ? 'Espace service'
+          : user?.role === 'admin'
+            ? 'Espace administration'
+          : 'Tableau de bord';
 
   return (
     <div className="grid min-h-screen lg:grid-cols-[260px_1fr]">
       <aside className="bg-charcoal px-6 py-8 text-cream">
         <div className="font-display text-3xl text-gold">Italia</div>
+        <div className="mt-4 text-xs uppercase tracking-[0.28em] text-gold/70">{roleTitle}</div>
         <div className="mt-3 text-sm text-cream/70">
           {user?.prenom} {user?.nom}
         </div>
@@ -59,13 +63,22 @@ export default function DashboardLayout() {
             Retour au site
           </Link>
           {nav.map((item) => (
-            <Link key={item.to} to={item.to} className="block rounded-2xl px-4 py-3 hover:bg-white/10">
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === '/client' || item.to === '/cook' || item.to === '/delivery' || item.to === '/server' || item.to === '/admin'}
+              className={({ isActive }) =>
+                `block rounded-2xl px-4 py-3 transition ${
+                  isActive ? 'bg-white text-charcoal' : 'text-cream hover:bg-white/10'
+                }`
+              }
+            >
               {item.label}
-            </Link>
+            </NavLink>
           ))}
         </nav>
         <button onClick={logout} className="mt-8 rounded-2xl bg-tomato px-4 py-3 text-sm text-white">
-          Logout
+          Deconnexion
         </button>
       </aside>
       <main className="bg-stone-50">

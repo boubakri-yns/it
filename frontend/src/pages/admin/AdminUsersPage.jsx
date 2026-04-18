@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import api from '../../api/axios';
-import { EmptyBlock, LoadingBlock, PageIntro, Panel, StatusPill } from '../../components/space/SpaceUI';
+import { EmptyBlock, LoadingBlock, PageIntro, Panel, StatGrid, StatusPill } from '../../components/space/SpaceUI';
 
 export default function AdminUsersPage() {
   const { register, handleSubmit, reset } = useForm({ defaultValues: { role: 'client', is_active: true } });
@@ -32,11 +32,22 @@ export default function AdminUsersPage() {
     load();
   };
 
+  const activeUsers = useMemo(() => users.filter((user) => user.is_active), [users]);
+  const actorUsers = useMemo(() => users.filter((user) => user.role !== 'client'), [users]);
+
   return (
     <div className="space-y-8">
-      <PageIntro eyebrow="Administration" title="CRUD utilisateurs" description="Creation et gestion des comptes clients et des comptes acteurs." />
+      <PageIntro eyebrow="Administration" title="Utilisateurs" description="Gestion simple des comptes clients et des comptes equipe avec activation rapide." />
+      <StatGrid
+        items={[
+          { label: 'Comptes', value: users.length, note: 'Tous les profils' },
+          { label: 'Actifs', value: activeUsers.length, note: 'Acces actuellement ouverts' },
+          { label: 'Equipe', value: actorUsers.length, note: 'Admin, service, cuisine, livraison' },
+          { label: 'Clients', value: users.length - actorUsers.length, note: 'Comptes front office' },
+        ]}
+      />
       <div className="grid gap-8 xl:grid-cols-[1fr_1.1fr]">
-        <Panel title="Nouvel utilisateur" subtitle="Creation rapide de compte">
+        <Panel title="Nouveau compte" subtitle="Creation rapide">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <input {...register('prenom', { required: true })} placeholder="Prenom" className="w-full rounded-2xl border p-3" />
             <input {...register('nom', { required: true })} placeholder="Nom" className="w-full rounded-2xl border p-3" />
@@ -62,7 +73,7 @@ export default function AdminUsersPage() {
           {!loading && users.length === 0 ? (
             <EmptyBlock label="Aucun utilisateur." />
           ) : (
-            <div className="space-y-4">
+            <div className="list-scroll max-h-[30rem] space-y-4 overflow-y-auto pr-3">
               {users.map((user) => (
                 <div key={user.id} className="flex flex-col gap-4 rounded-[1.5rem] border border-charcoal/10 p-5 md:flex-row md:items-center md:justify-between">
                   <div>

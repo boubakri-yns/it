@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../api/axios';
-import { addToCart } from '../../utils/cart';
+import { useAuth } from '../../hooks/useAuth';
+import { addToCart, canUseCart } from '../../utils/cart';
 
 export default function ProductPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const cartVisible = canUseCart(user);
   const [product, setProduct] = useState(null);
 
   useEffect(() => {
@@ -22,16 +26,19 @@ export default function ProductPage() {
           <p className="text-sm uppercase tracking-[0.35em] text-olive">{product.category?.name}</p>
           <h1 className="mt-4 font-display text-5xl">{product.name}</h1>
           <p className="mt-6 text-lg text-charcoal/70">{product.description}</p>
-          <div className="mt-6 text-3xl font-semibold text-tomato">{product.price} EUR</div>
-          <button
-            onClick={() => {
-              addToCart(product);
-              toast.success('Plat ajouté au panier');
-            }}
-            className="mt-8 rounded-full bg-charcoal px-6 py-3 text-cream"
-          >
-            Ajouter au panier
-          </button>
+          <div className="mt-6 text-3xl font-semibold text-tomato">{product.price} MAD</div>
+          {cartVisible ? (
+            <button
+              onClick={() => {
+                addToCart(product, 1, user);
+                toast.success('Plat ajoute au panier');
+                navigate('/paiement');
+              }}
+              className="mt-8 rounded-full bg-charcoal px-6 py-3 text-cream"
+            >
+              Ajouter au panier
+            </button>
+          ) : null}
         </div>
       </div>
     </section>

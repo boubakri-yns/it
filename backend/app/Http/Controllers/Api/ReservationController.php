@@ -26,7 +26,7 @@ class ReservationController extends Controller
         $table = RestaurantTable::query()->findOrFail($request->integer('table_id'));
 
         abort_if(
-            in_array($table->statut, [TableStatus::Occupee, TableStatus::Indisponible], true),
+            $table->statut !== TableStatus::Libre,
             422,
             'Cette table n est pas disponible.'
         );
@@ -36,7 +36,6 @@ class ReservationController extends Controller
             ->whereDate('reservation_date', $request->date('reservation_date'))
             ->where('reservation_time', $request->string('reservation_time'))
             ->whereIn('status', [
-                ReservationStatus::Pending,
                 ReservationStatus::Confirmed,
                 ReservationStatus::Arrived,
             ])
@@ -44,12 +43,16 @@ class ReservationController extends Controller
 
         abort_if($hasConflict, 422, 'Cette table est deja reservee pour ce creneau.');
 
-        $reservation = DB::transaction(function () use ($request, $authenticatedUser) {
-            return Reservation::create([
+        $reservation = DB::transaction(function () use ($request, $authenticatedUser, $table) {
+            $reservation = Reservation::create([
                 ...$request->validated(),
                 'user_id' => $authenticatedUser?->id,
-                'status' => ReservationStatus::Pending,
-            ])->load('table');
+                'status' => ReservationStatus::Confirmed,
+            ]);
+
+            $table->update(['statut' => TableStatus::Reservee]);
+
+            return $reservation->load('table');
         });
 
         $this->activityLogService->log(

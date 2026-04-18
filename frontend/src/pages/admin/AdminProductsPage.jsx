@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import api from '../../api/axios';
-import { EmptyBlock, LoadingBlock, PageIntro, Panel, StatusPill } from '../../components/space/SpaceUI';
+import { EmptyBlock, LoadingBlock, PageIntro, Panel, StatGrid, StatusPill } from '../../components/space/SpaceUI';
 import { formatMoney } from '../../utils/actorSpaces';
 
 export default function AdminProductsPage() {
@@ -30,9 +30,20 @@ export default function AdminProductsPage() {
     load();
   };
 
+  const availableProducts = useMemo(() => products.filter((product) => product.is_available), [products]);
+  const featuredProducts = useMemo(() => products.filter((product) => product.is_featured), [products]);
+
   return (
     <div className="space-y-8">
-      <PageIntro eyebrow="Administration" title="CRUD plats" description="Catalogue des plats avec categorie, prix et disponibilite." />
+      <PageIntro eyebrow="Administration" title="Catalogue" description="Gestion claire des plats, categories et disponibilites visibles par le client." />
+      <StatGrid
+        items={[
+          { label: 'Plats', value: products.length, note: 'Catalogue total' },
+          { label: 'Disponibles', value: availableProducts.length, note: 'Affichables a la commande' },
+          { label: 'Mis en avant', value: featuredProducts.length, note: 'Produits pousses sur le site' },
+          { label: 'Categories', value: categories.length, note: 'Organisation du menu' },
+        ]}
+      />
       <div className="grid gap-8 xl:grid-cols-[1fr_1.1fr]">
         <Panel title="Nouveau plat" subtitle="Ajout au catalogue">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -64,7 +75,7 @@ export default function AdminProductsPage() {
           {!loading && products.length === 0 ? (
             <EmptyBlock label="Aucun plat." />
           ) : (
-            <div className="space-y-4">
+            <div className="list-scroll max-h-[30rem] space-y-4 overflow-y-auto pr-3">
               {products.map((product) => (
                 <div key={product.id} className="flex flex-col gap-4 rounded-[1.5rem] border border-charcoal/10 p-5 md:flex-row md:items-center md:justify-between">
                   <div>

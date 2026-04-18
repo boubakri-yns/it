@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '../../api/axios';
-import { LoadingBlock, PageIntro, Panel } from '../../components/space/SpaceUI';
+import { LoadingBlock, PageIntro, Panel, StatGrid } from '../../components/space/SpaceUI';
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState(null);
@@ -22,13 +22,23 @@ export default function AdminSettingsPage() {
     toast.success('Parametres sauvegardes');
   };
 
+  const groups = useMemo(() => [...new Set((settings || []).map((setting) => setting.group))], [settings]);
+
   if (!settings) {
     return <LoadingBlock label="Chargement des parametres..." />;
   }
 
   return (
     <div className="space-y-8">
-      <PageIntro eyebrow="Administration" title="Parametres" description="Horaires, regles de livraison et configuration Stripe." />
+      <PageIntro eyebrow="Administration" title="Parametres" description="Reglages essentiels du restaurant, de la livraison et du paiement centralises sur un seul ecran." />
+      <StatGrid
+        items={[
+          { label: 'Reglages', value: settings.length, note: 'Champs configurables' },
+          { label: 'Groupes', value: groups.length, note: 'Blocs de configuration' },
+          { label: 'Livraison', value: settings.filter((setting) => setting.group === 'delivery').length, note: 'Regles de zone et cout' },
+          { label: 'Paiement', value: settings.filter((setting) => setting.group === 'stripe').length, note: 'Configuration Stripe' },
+        ]}
+      />
       <Panel title="Configuration generale" subtitle="Edition des reglages">
         <div className="grid gap-4">
           {settings.map((setting, index) => (

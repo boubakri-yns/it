@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import api from '../../api/axios';
 import { useAuth } from '../../hooks/useAuth';
-import { EmptyBlock, LoadingBlock, PageIntro, Panel, StatusPill } from '../../components/space/SpaceUI';
+import { EmptyBlock, LoadingBlock, PageIntro, Panel, StatGrid, StatusPill } from '../../components/space/SpaceUI';
 import { formatLabel, formatMoney, statusTone } from '../../utils/actorSpaces';
 
 export default function ServerOnsiteOrdersPage() {
@@ -33,6 +33,7 @@ export default function ServerOnsiteOrdersPage() {
   }, []);
 
   const availableProducts = useMemo(() => products.filter((product) => product.is_available), [products]);
+  const occupiedTables = useMemo(() => tables.filter((table) => table.statut === 'occupee'), [tables]);
 
   const addItem = () => setSelectedItems((current) => [...current, { product_id: '', quantity: 1 }]);
 
@@ -67,7 +68,15 @@ export default function ServerOnsiteOrdersPage() {
 
   return (
     <div className="space-y-8">
-      <PageIntro eyebrow="Service salle" title="Commandes sur place" description="Creation rapide de commandes par table et suivi des commandes salle existantes." />
+      <PageIntro eyebrow="Service salle" title="Prise de commande sur place" description="Creer rapidement une commande par table puis suivre l etat des tickets deja envoyes." />
+      <StatGrid
+        items={[
+          { label: 'Tickets salle', value: orders.length, note: 'Commandes sur place deja creees' },
+          { label: 'Tables occupees', value: occupiedTables.length, note: 'Tables actuellement servies' },
+          { label: 'Produits actifs', value: availableProducts.length, note: 'Carte disponible a la saisie' },
+          { label: 'Prochaine table', value: tables[0]?.numero || '-', note: tables.length > 0 ? 'Premiere table chargee' : 'Aucune table' },
+        ]}
+      />
       <div className="grid gap-8 xl:grid-cols-[1.1fr_1fr]">
         <Panel title="Nouvelle commande" subtitle="Saisie rapide par table">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -104,7 +113,7 @@ export default function ServerOnsiteOrdersPage() {
           {!loading && orders.length === 0 ? (
             <EmptyBlock label="Aucune commande sur place." />
           ) : (
-            <div className="space-y-4">
+            <div className="list-scroll max-h-[30rem] space-y-4 overflow-y-auto pr-3">
               {orders.map((order) => (
                 <div key={order.id} className="rounded-[1.5rem] border border-charcoal/10 p-5">
                   <div className="flex items-center justify-between gap-3">

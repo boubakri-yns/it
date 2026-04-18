@@ -116,7 +116,7 @@ return new class extends Migration
             $table->foreignId('order_id')->constrained()->cascadeOnDelete();
             $table->string('stripe_payment_intent_id')->nullable();
             $table->decimal('amount', 10, 2);
-            $table->string('currency')->default('eur');
+            $table->string('currency')->default('mad');
             $table->string('status')->default('pending');
             $table->string('method')->default('stripe');
             $table->timestamp('paid_at')->nullable();

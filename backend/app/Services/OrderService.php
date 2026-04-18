@@ -43,7 +43,7 @@ class OrderService
 
             $subtotal = $items->sum('total_price');
             $deliveryFee = $payload['order_type'] === 'livraison'
-                ? (float) (Setting::query()->where('key', 'delivery_fee')->value('value') ?? 4.50)
+                ? (float) (Setting::query()->where('key', 'delivery_fee')->value('value') ?? 50.00)
                 : 0;
 
             if ($payload['order_type'] === 'livraison' && empty($payload['address'])) {

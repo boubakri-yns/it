@@ -42,7 +42,7 @@ export default function HomePage() {
                 <div key={product.id} className="rounded-3xl bg-white/10 p-4">
                   <div className="text-sm uppercase tracking-[0.3em] text-gold">{product.category?.name || 'Signature'}</div>
                   <div className="mt-2 font-display text-2xl">{product.name}</div>
-                  <div className="mt-2 text-sm text-cream/70">{product.price} EUR</div>
+                  <div className="mt-2 text-sm text-cream/70">{product.price} MAD</div>
                 </div>
               ))}
             </div>
@@ -62,7 +62,7 @@ export default function HomePage() {
               <div className="text-sm uppercase tracking-[0.3em] text-olive">{product.name}</div>
               <p className="mt-3 text-sm text-charcoal/70">{product.description}</p>
               <div className="mt-4 flex items-center justify-between">
-                <span className="font-semibold text-tomato">{product.price} EUR</span>
+                <span className="font-semibold text-tomato">{product.price} MAD</span>
                 <Link to={`/menu/${product.id}`} className="text-sm font-semibold text-charcoal">
                   Detail
                 </Link>

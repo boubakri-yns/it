@@ -1,4 +1,5 @@
 import { lazy } from 'react';
+import { Navigate } from 'react-router-dom';
 import PublicLayout from '../components/layout/PublicLayout';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import ProtectedRoute from './ProtectedRoute';
@@ -9,6 +10,7 @@ const ProductPage = lazy(() => import('../pages/public/ProductPage'));
 const ReservationPage = lazy(() => import('../pages/public/ReservationPage'));
 const CartPage = lazy(() => import('../pages/public/CartPage'));
 const CheckoutPage = lazy(() => import('../pages/public/CheckoutPage'));
+const OrderChoicePage = lazy(() => import('../pages/public/OrderChoicePage'));
 const LoginPage = lazy(() => import('../pages/public/LoginPage'));
 const RegisterPage = lazy(() => import('../pages/public/RegisterPage'));
 const ContactPage = lazy(() => import('../pages/public/ContactPage'));
@@ -57,8 +59,14 @@ export const appRoutes = [
       { path: 'menu', element: <MenuPage /> },
       { path: 'menu/:id', element: <ProductPage /> },
       { path: 'reservation', element: <ReservationPage /> },
-      { path: 'panier', element: <CartPage /> },
-      { path: 'paiement', element: <CheckoutPage /> },
+      {
+        element: <ProtectedRoute roles={['client']} />,
+        children: [
+          { path: 'panier', element: <CartPage /> },
+          { path: 'commande', element: <OrderChoicePage /> },
+          { path: 'paiement', element: <CheckoutPage /> },
+        ],
+      },
       { path: 'connexion', element: <LoginPage /> },
       { path: 'inscription', element: <RegisterPage /> },
       { path: 'contact', element: <ContactPage /> },
@@ -104,7 +112,7 @@ export const appRoutes = [
         children: [
           { index: true, element: <DeliveryDashboardPage /> },
           { path: 'available', element: <DeliveryAvailablePage /> },
-          { path: 'active', element: <DeliveryMinePage /> },
+          { path: 'active', element: <Navigate to="/delivery/detail" replace /> },
           { path: 'mine', element: <DeliveryMinePage /> },
           { path: 'detail', element: <DeliveryDetailPage /> },
           { path: 'history', element: <DeliveryHistoryPage /> },

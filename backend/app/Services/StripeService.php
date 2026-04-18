@@ -7,7 +7,7 @@ use Stripe\Stripe;
 
 class StripeService
 {
-    public function createPaymentIntent(int $amountInCents, string $currency = 'eur', array $metadata = []): array
+    public function createPaymentIntent(int $amountInCents, string $currency = 'mad', array $metadata = []): array
     {
         Stripe::setApiKey((string) config('services.stripe.secret'));
 

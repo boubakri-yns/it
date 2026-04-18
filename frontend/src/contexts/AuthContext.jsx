@@ -1,6 +1,7 @@
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
+import { cleanupLegacyCartStorage, notifyCartContextChanged } from '../utils/cart';
 
 export const AuthContext = createContext(null);
 
@@ -47,6 +48,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
+    cleanupLegacyCartStorage();
     fetchUser();
   }, [fetchUser]);
 
@@ -56,6 +58,7 @@ export function AuthProvider({ children }) {
       persistAuth(data);
       setToken(data.token);
       setUser(data.user);
+      notifyCartContextChanged();
       toast.success('Connexion reussie');
       return data.user;
     } catch (error) {
@@ -71,6 +74,7 @@ export function AuthProvider({ children }) {
       persistAuth(data);
       setToken(data.token);
       setUser(data.user);
+      notifyCartContextChanged();
       toast.success('Compte cree');
       return data.user;
     } catch (error) {
@@ -89,6 +93,7 @@ export function AuthProvider({ children }) {
       clearAuthStorage();
       setToken(null);
       setUser(null);
+      notifyCartContextChanged();
       toast.success('Deconnecte');
     }
   }, []);

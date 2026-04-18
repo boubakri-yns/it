@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/axios';
-import { EmptyBlock, FauxMap, LoadingBlock, PageIntro, Panel, StatusPill } from '../../components/space/SpaceUI';
+import { EmptyBlock, FauxMap, LoadingBlock, PageIntro, Panel, StatGrid, StatusPill } from '../../components/space/SpaceUI';
 import { formatLabel, statusTone } from '../../utils/actorSpaces';
 
 export default function DeliveryDetailPage() {
@@ -44,6 +44,14 @@ export default function DeliveryDetailPage() {
           <button key="done" onClick={() => api.put(`/deliveries/${delivery.id}/complete`).then(({ data }) => setDelivery(data))} className="rounded-full bg-tomato px-5 py-3 text-sm text-white">
             Confirmer livree
           </button>,
+        ]}
+      />
+      <StatGrid
+        items={[
+          { label: 'Mission', value: `#${delivery.id}`, note: `Commande #${delivery.order?.id || '-'}` },
+          { label: 'Statut', value: formatLabel(delivery.status), note: 'Etat actuel du trajet' },
+          { label: 'Ville', value: delivery.order?.city || '-', note: 'Zone de destination' },
+          { label: 'Client', value: delivery.order?.prenom || '-', note: delivery.order?.nom || '-' },
         ]}
       />
       <div className="grid gap-8 xl:grid-cols-[1.4fr_1fr]">

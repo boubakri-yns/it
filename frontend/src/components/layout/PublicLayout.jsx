@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { roleSpaceMeta } from '../../utils/actorSpaces';
-import { getCart, getCartEventName } from '../../utils/cart';
+import { canUseCart, getCart, getCartEventName } from '../../utils/cart';
 
 function CartIcon() {
   return (
@@ -29,10 +29,11 @@ export default function PublicLayout() {
   const { user, logout } = useAuth();
   const actorSpace = user ? roleSpaceMeta[user.role] : null;
   const [cartCount, setCartCount] = useState(0);
+  const cartEnabled = canUseCart(user);
 
   useEffect(() => {
     const syncCartCount = () => {
-      const items = getCart();
+      const items = getCart(user);
       setCartCount(items.reduce((sum, item) => sum + Number(item.quantity || 0), 0));
     };
 
@@ -46,7 +47,7 @@ export default function PublicLayout() {
       window.removeEventListener('focus', syncCartCount);
       window.removeEventListener(getCartEventName(), syncCartCount);
     };
-  }, [user?.id]);
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-cream">
@@ -82,18 +83,20 @@ export default function PublicLayout() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <Link
-                to="/panier"
-                className="inline-flex cursor-pointer items-center gap-3 rounded-[1rem] border border-charcoal/12 bg-cream px-4 py-3 text-charcoal transition hover:border-olive/40"
-              >
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-charcoal/10 bg-white text-charcoal">
-                  <CartIcon />
-                </span>
-                <span className="text-sm font-semibold">Panier</span>
-                <span className="inline-flex min-w-7 items-center justify-center rounded-full bg-tomato px-2 py-1 text-xs font-semibold text-white">
-                  {cartCount}
-                </span>
-              </Link>
+              {cartEnabled ? (
+                <Link
+                  to="/panier"
+                  className="inline-flex cursor-pointer items-center gap-3 rounded-[1rem] border border-charcoal/12 bg-cream px-4 py-3 text-charcoal transition hover:border-olive/40"
+                >
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-charcoal/10 bg-white text-charcoal">
+                    <CartIcon />
+                  </span>
+                  <span className="text-sm font-semibold">Panier</span>
+                  <span className="inline-flex min-w-7 items-center justify-center rounded-full bg-tomato px-2 py-1 text-xs font-semibold text-white">
+                    {cartCount}
+                  </span>
+                </Link>
+              ) : null}
 
               {user ? (
                 <>

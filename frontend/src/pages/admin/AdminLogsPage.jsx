@@ -22,7 +22,7 @@ export default function AdminLogsPage() {
         {!loading && logs.length === 0 ? (
           <EmptyBlock label="Aucun log d'activite." />
         ) : (
-          <div className="space-y-4">
+          <div className="list-scroll max-h-[30rem] space-y-4 overflow-y-auto pr-3">
             {logs.map((log) => (
               <div key={log.id} className="flex flex-col gap-4 rounded-[1.5rem] border border-charcoal/10 p-5 md:flex-row md:items-center md:justify-between">
                 <div>

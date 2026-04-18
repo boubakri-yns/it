@@ -24,14 +24,18 @@ class OrderController extends Controller
     {
         $order = $this->orderService->create($request->validated(), $request->user()?->id);
 
-        if ($request->filled('stripe_payment_intent_id')) {
+        if ($request->filled('stripe_payment_intent_id') || $request->filled('payment_method')) {
+            $method = (string) $request->input('payment_method', 'stripe');
+
             Payment::create([
                 'order_id' => $order->id,
-                'stripe_payment_intent_id' => (string) $request->input('stripe_payment_intent_id'),
+                'stripe_payment_intent_id' => $request->filled('stripe_payment_intent_id')
+                    ? (string) $request->input('stripe_payment_intent_id')
+                    : null,
                 'amount' => $order->total,
-                'currency' => 'eur',
+                'currency' => 'mad',
                 'status' => $order->payment_status,
-                'method' => 'stripe',
+                'method' => $method,
                 'paid_at' => $request->boolean('payment_confirmed') ? now() : null,
             ]);
         }

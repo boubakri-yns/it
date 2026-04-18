@@ -6,6 +6,8 @@
 /backend/storage/framework/testing/*
 /backend/storage/framework/views/*
 /backend/storage/logs/*
+/backend/.env
+/backend/.phpunit.result.cache
 /frontend/node_modules
 /frontend/dist
 .idea

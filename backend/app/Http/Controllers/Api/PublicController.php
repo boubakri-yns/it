@@ -57,7 +57,7 @@ class PublicController extends Controller
     {
         $query = RestaurantTable::query()
             ->where('is_active', true)
-            ->whereNotIn('statut', [TableStatus::Occupee, TableStatus::Indisponible]);
+            ->where('statut', TableStatus::Libre);
 
         if ($request->filled('guest_count')) {
             $query->where('capacite', '>=', $request->integer('guest_count'));
@@ -68,7 +68,6 @@ class PublicController extends Controller
                 ->whereDate('reservation_date', $request->string('reservation_date'))
                 ->where('reservation_time', $request->string('reservation_time'))
                 ->whereIn('status', [
-                    ReservationStatus::Pending,
                     ReservationStatus::Confirmed,
                     ReservationStatus::Arrived,
                 ])

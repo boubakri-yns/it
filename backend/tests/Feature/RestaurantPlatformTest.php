@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Enums\DeliveryStatus;
 use App\Enums\OrderStatus;
+use App\Enums\ReservationStatus;
+use App\Enums\TableStatus;
 use App\Enums\UserRole;
 use App\Models\Delivery;
 use App\Models\Order;
@@ -49,7 +51,14 @@ class RestaurantPlatformTest extends TestCase
             'guest_count' => 2,
         ])->assertCreated();
 
-        $this->assertDatabaseHas('reservations', ['email' => 'booking@example.com']);
+        $this->assertDatabaseHas('reservations', [
+            'email' => 'booking@example.com',
+            'status' => ReservationStatus::Confirmed->value,
+        ]);
+        $this->assertDatabaseHas('restaurant_tables', [
+            'id' => $table->id,
+            'statut' => TableStatus::Reservee->value,
+        ]);
     }
 
     public function test_client_reservations_are_sorted_by_date_time_and_latest_id(): void
@@ -68,7 +77,7 @@ class RestaurantPlatformTest extends TestCase
             'reservation_date' => today()->addDays(2)->toDateString(),
             'reservation_time' => '19:00',
             'guest_count' => 2,
-            'status' => 'pending',
+            'status' => ReservationStatus::Confirmed,
         ]);
 
         $latestReservation = Reservation::create([
@@ -81,7 +90,7 @@ class RestaurantPlatformTest extends TestCase
             'reservation_date' => today()->addDays(2)->toDateString(),
             'reservation_time' => '21:00',
             'guest_count' => 2,
-            'status' => 'pending',
+            'status' => ReservationStatus::Confirmed,
         ]);
 
         Sanctum::actingAs($client);
@@ -106,7 +115,7 @@ class RestaurantPlatformTest extends TestCase
             'reservation_date' => today()->addDay()->toDateString(),
             'reservation_time' => '20:30',
             'guest_count' => 4,
-            'status' => 'pending',
+            'status' => ReservationStatus::Confirmed,
         ]);
 
         Sanctum::actingAs($server);

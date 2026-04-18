@@ -112,8 +112,8 @@ export default function ReservationPage() {
           <p className="text-sm uppercase tracking-[0.35em] text-tomato">Reservation</p>
           <h1 className="mt-4 font-display text-5xl">Choisissez votre table et votre horaire.</h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-charcoal/70">
-            Renseigne le nombre de personnes, la date et l heure. L application affiche ensuite seulement les tables encore libres
-            pour ce creneau.
+            Renseigne le nombre de personnes, la date et l heure. L application affiche ensuite seulement les tables au statut libre.
+            Quand une reservation est validee, la table passe automatiquement en reservee.
           </p>
 
           <div className="mt-8 rounded-[2rem] border border-charcoal/10 bg-white p-6 shadow-soft">
@@ -123,6 +123,7 @@ export default function ReservationPage() {
                 <div key={table.id} className="rounded-3xl border border-charcoal/10 bg-cream p-5">
                   <div className="font-semibold text-charcoal">Table {table.numero}</div>
                   <div className="mt-2 text-sm text-charcoal/70">{table.capacite} personnes</div>
+                  <div className="mt-1 text-xs uppercase tracking-[0.2em] text-olive">Statut libre</div>
                 </div>
               ))}
               {!loadingTables && tables.length === 0 ? (

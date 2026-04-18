@@ -1,12 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
-import { addToCart } from '../../utils/cart';
+import { useAuth } from '../../hooks/useAuth';
+import { addToCart, canUseCart } from '../../utils/cart';
 import { fallbackMenu } from '../../utils/menuFallback';
 
 const MENU_CACHE_KEY = 'menu_cache_v2';
 
 export default function MenuPage() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const cartVisible = canUseCart(user);
   const [products, setProducts] = useState([]);
   const [activeCategory, setActiveCategory] = useState('Tout');
   const [search, setSearch] = useState('');
@@ -88,43 +93,48 @@ export default function MenuPage() {
                   <img src={product.image} alt={product.name} className="h-40 w-full rounded-[1rem] object-cover" />
                 </div>
                 <div className="px-4 pb-5">
-                  <div className="flex items-center justify-between text-sm text-charcoal/70">
+                  <div className="flex items-center justify-between gap-3 text-sm text-charcoal/70">
                     <span>{product.category?.name}</span>
-                    <span>{Number(product.price).toFixed(2)} EUR</span>
+                    <span className="inline-flex rounded-[0.9rem] border border-tomato/35 bg-tomato/8 px-3 py-1.5 font-semibold text-tomato shadow-[0_8px_24px_rgba(196,69,54,0.12)]">
+                      {Number(product.price).toFixed(2)} MAD
+                    </span>
                   </div>
                   <h3 className="mt-4 text-2xl font-semibold text-charcoal">{product.name}</h3>
                   <p className="mt-4 min-h-[72px] text-sm leading-6 text-charcoal/60">{product.description}</p>
-                  <div className="mt-6 space-y-3">
-                    <div className="rounded-[1.5rem] border border-charcoal/15 px-4 py-3">
-                      <div className="mb-3 text-center text-sm font-medium text-charcoal/70">Quantite</div>
-                      <div className="flex items-center justify-between gap-3 rounded-full bg-cream px-3 py-2">
-                        <button
-                          onClick={() => adjustQuantity(product.id, -1)}
-                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-charcoal/15 bg-white text-lg text-charcoal transition hover:border-olive"
-                        >
-                          -
-                        </button>
-                        <span className="min-w-10 text-center text-base font-semibold text-charcoal">
-                          {quantities[product.id] || 1}
-                        </span>
-                        <button
-                          onClick={() => adjustQuantity(product.id, 1)}
-                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-charcoal/15 bg-white text-lg text-charcoal transition hover:border-olive"
-                        >
-                          +
-                        </button>
+                  {cartVisible ? (
+                    <div className="mt-6 space-y-3">
+                      <div className="rounded-[1.5rem] border border-charcoal/15 px-4 py-3">
+                        <div className="mb-3 text-center text-sm font-medium text-charcoal/70">Quantite</div>
+                        <div className="flex items-center justify-between gap-3 rounded-full bg-cream px-3 py-2">
+                          <button
+                            onClick={() => adjustQuantity(product.id, -1)}
+                            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-charcoal/15 bg-white text-lg text-charcoal transition hover:border-olive"
+                          >
+                            -
+                          </button>
+                          <span className="min-w-10 text-center text-base font-semibold text-charcoal">
+                            {quantities[product.id] || 1}
+                          </span>
+                          <button
+                            onClick={() => adjustQuantity(product.id, 1)}
+                            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-charcoal/15 bg-white text-lg text-charcoal transition hover:border-olive"
+                          >
+                            +
+                          </button>
+                        </div>
                       </div>
+                      <button
+                        onClick={() => {
+                          addToCart(product, quantities[product.id] || 1, user);
+                          toast.success(`${product.name} ajoute au panier`);
+                          navigate('/paiement');
+                        }}
+                        className="w-full rounded-full bg-tomato px-5 py-3 text-sm font-medium text-white transition hover:bg-tomato/90"
+                      >
+                        Commander
+                      </button>
                     </div>
-                    <button
-                      onClick={() => {
-                        addToCart(product, quantities[product.id] || 1);
-                        toast.success(`${product.name} ajoute au panier`);
-                      }}
-                      className="w-full rounded-full bg-tomato px-5 py-3 text-sm font-medium text-white transition hover:bg-tomato/90"
-                    >
-                      Commander
-                    </button>
-                  </div>
+                  ) : null}
                 </div>
               </article>
             ))}

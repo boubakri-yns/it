@@ -17,6 +17,7 @@ class StoreOrderRequest extends FormRequest
         return [
             'table_id' => ['nullable', 'exists:restaurant_tables,id'],
             'order_type' => ['required', Rule::in(['sur_place', 'a_emporter', 'livraison'])],
+            'payment_method' => ['nullable', Rule::in(['stripe', 'cash_on_delivery'])],
             'nom' => ['required', 'string', 'max:255'],
             'prenom' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email'],

@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\OrderStatus;
 use App\Enums\ReservationStatus;
 use App\Enums\TableStatus;
-use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreOrderRequest;
 use App\Models\Order;
@@ -29,7 +29,6 @@ class ServerController extends Controller
             Reservation::query()
                 ->whereDate('reservation_date', '>=', today())
                 ->whereIn('status', [
-                    ReservationStatus::Pending,
                     ReservationStatus::Confirmed,
                     ReservationStatus::Arrived,
                 ])
@@ -72,7 +71,7 @@ class ServerController extends Controller
     {
         $reservation->update(['status' => ReservationStatus::Arrived]);
         $reservation->table()->update(['statut' => TableStatus::Occupee]);
-        $this->activityLogService->log($request->user()->id, 'reservation', $reservation->id, 'arrived', 'Client arrivé');
+        $this->activityLogService->log($request->user()->id, 'reservation', $reservation->id, 'arrived', 'Client arrive');
 
         return response()->json($reservation->fresh('table'));
     }
@@ -80,7 +79,7 @@ class ServerController extends Controller
     public function occupy(Request $request, RestaurantTable $table): JsonResponse
     {
         $table->update(['statut' => TableStatus::Occupee]);
-        $this->activityLogService->log($request->user()->id, 'table', $table->id, 'occupied', 'Table occupée');
+        $this->activityLogService->log($request->user()->id, 'table', $table->id, 'occupied', 'Table occupee');
 
         return response()->json($table);
     }
@@ -88,7 +87,14 @@ class ServerController extends Controller
     public function free(Request $request, RestaurantTable $table): JsonResponse
     {
         $table->update(['statut' => TableStatus::Libre]);
-        $this->activityLogService->log($request->user()->id, 'table', $table->id, 'freed', 'Table libérée');
+
+        Reservation::query()
+            ->where('table_id', $table->id)
+            ->whereDate('reservation_date', '<=', today())
+            ->whereIn('status', [ReservationStatus::Confirmed, ReservationStatus::Arrived])
+            ->update(['status' => ReservationStatus::Completed]);
+
+        $this->activityLogService->log($request->user()->id, 'table', $table->id, 'freed', 'Table liberee');
 
         return response()->json($table);
     }

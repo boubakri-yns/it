@@ -18,7 +18,7 @@ class CheckoutController extends Controller
         return response()->json(
             $this->stripeService->createPaymentIntent(
                 (int) round($request->input('amount') * 100),
-                strtolower((string) $request->input('currency', 'eur')),
+                strtolower((string) $request->input('currency', 'mad')),
             )
         );
     }

@@ -1,54 +1,86 @@
 const LEGACY_CART_KEY = 'cart_items';
+const GUEST_CART_KEY = 'cart_items_guest';
 const CART_EVENT = 'cart:changed';
 
-function getActiveCartKey() {
+function readStoredUser() {
   const rawUser = localStorage.getItem('auth_user');
 
   if (!rawUser) {
-    return 'cart_items_guest';
+    return null;
   }
 
   try {
-    const user = JSON.parse(rawUser);
-    if (user?.id) {
-      return `cart_items_user_${user.id}`;
-    }
+    return JSON.parse(rawUser);
   } catch {
-    // Ignore malformed auth_user and fallback to guest cart.
+    return null;
   }
-
-  return 'cart_items_guest';
 }
 
-function isGuestCartKey(key) {
-  return key === 'cart_items_guest';
+export function canUseCart(user = readStoredUser()) {
+  return Boolean(user?.id) && user?.role === 'client';
+}
+
+function getActiveCartKey(user = readStoredUser()) {
+  const activeUser = user ?? readStoredUser();
+
+  if (!canUseCart(activeUser)) {
+    return null;
+  }
+
+  return `cart_items_user_${activeUser.id}`;
 }
 
 function emitCartChange() {
   window.dispatchEvent(new Event(CART_EVENT));
 }
 
-export function getCart() {
-  const activeKey = getActiveCartKey();
-  const activeCart = localStorage.getItem(activeKey);
-  if (activeCart) {
-    return JSON.parse(activeCart);
+function readCartItems(key) {
+  if (!key) {
+    return [];
   }
 
-  if (isGuestCartKey(activeKey)) {
-    return JSON.parse(localStorage.getItem(LEGACY_CART_KEY) || '[]');
+  try {
+    return JSON.parse(localStorage.getItem(key) || '[]');
+  } catch {
+    return [];
   }
-
-  return [];
 }
 
-export function saveCart(items) {
-  localStorage.setItem(getActiveCartKey(), JSON.stringify(items));
+export function cleanupLegacyCartStorage() {
+  localStorage.removeItem(LEGACY_CART_KEY);
+  localStorage.removeItem(GUEST_CART_KEY);
+}
+
+export function notifyCartContextChanged() {
+  cleanupLegacyCartStorage();
   emitCartChange();
 }
 
-export function addToCart(product, quantity = 1) {
-  const items = getCart();
+export function getCart(user) {
+  return readCartItems(getActiveCartKey(user));
+}
+
+export function saveCart(items, user) {
+  const activeKey = getActiveCartKey(user);
+
+  if (!activeKey) {
+    return [];
+  }
+
+  localStorage.setItem(activeKey, JSON.stringify(items));
+  emitCartChange();
+
+  return items;
+}
+
+export function addToCart(product, quantity = 1, user) {
+  const activeKey = getActiveCartKey(user);
+
+  if (!activeKey) {
+    return null;
+  }
+
+  const items = readCartItems(activeKey);
   const existing = items.find((item) => item.product_id === product.id);
   if (existing) {
     existing.quantity += quantity;
@@ -60,24 +92,25 @@ export function addToCart(product, quantity = 1) {
       quantity,
     });
   }
-  saveCart(items);
+
+  return saveCart(items, user);
 }
 
-export function updateCartQuantity(productId, quantity) {
+export function updateCartQuantity(productId, quantity, user) {
   const normalized = Math.max(1, Number(quantity) || 1);
-  const next = getCart().map((item) => (item.product_id === productId ? { ...item, quantity: normalized } : item));
-  saveCart(next);
+  const next = getCart(user).map((item) => (item.product_id === productId ? { ...item, quantity: normalized } : item));
+  saveCart(next, user);
   return next;
 }
 
-export function removeFromCart(productId) {
-  const next = getCart().filter((item) => item.product_id !== productId);
-  saveCart(next);
+export function removeFromCart(productId, user) {
+  const next = getCart(user).filter((item) => item.product_id !== productId);
+  saveCart(next, user);
   return next;
 }
 
-export function clearCart() {
-  saveCart([]);
+export function clearCart(user) {
+  return saveCart([], user);
 }
 
 export function getCartEventName() {

@@ -22,7 +22,7 @@ export default function AdminDeliveriesPage() {
         {!loading && deliveries.length === 0 ? (
           <EmptyBlock label="Aucune livraison." />
         ) : (
-          <div className="space-y-4">
+          <div className="list-scroll max-h-[30rem] space-y-4 overflow-y-auto pr-3">
             {deliveries.map((delivery) => (
               <div key={delivery.id} className="flex flex-col gap-4 rounded-[1.5rem] border border-charcoal/10 p-5 lg:flex-row lg:items-center lg:justify-between">
                 <div>
