@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import SiteFooter from './SiteFooter';
 
 const navByRole = {
   client: [
@@ -81,11 +82,14 @@ export default function DashboardLayout() {
           Deconnexion
         </button>
       </aside>
-      <main className="bg-stone-50">
-        <div className="container-shell py-8">
-          <Outlet />
-        </div>
-      </main>
+      <div className="flex min-h-screen flex-col bg-stone-50">
+        <main className="flex-1">
+          <div className="container-shell py-8">
+            <Outlet />
+          </div>
+        </main>
+        <SiteFooter />
+      </div>
     </div>
   );
 }

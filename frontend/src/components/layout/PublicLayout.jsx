@@ -3,6 +3,8 @@ import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { roleSpaceMeta } from '../../utils/actorSpaces';
 import { canUseCart, getCart, getCartEventName } from '../../utils/cart';
+import brandLogo from '../../assets/logo-main.png';
+import SiteFooter from './SiteFooter';
 
 function CartIcon() {
   return (
@@ -50,15 +52,20 @@ export default function PublicLayout() {
   }, [user]);
 
   return (
-    <div className="min-h-screen bg-cream">
+    <div className="flex min-h-screen flex-col bg-cream">
       <header className="border-b border-charcoal/10 bg-white/95 backdrop-blur">
         <div className="container-shell py-4">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:gap-12">
               <Link to="/" className="flex items-center gap-3">
-                <span className="flex h-12 w-12 items-center justify-center rounded-[1rem] bg-tomato text-xl font-bold text-white">
-                  I
-                </span>
+                <img
+                  src={brandLogo}
+                  alt="Italia logo"
+                  className="h-14 w-auto object-contain"
+                  loading="eager"
+                  decoding="async"
+                  draggable="false"
+                />
                 <span className="flex flex-col">
                   <span className="font-display text-2xl font-semibold uppercase tracking-[0.04em] text-charcoal">Italia</span>
                   <span className="text-xs uppercase tracking-[0.3em] text-charcoal/55">Ristorante</span>
@@ -133,9 +140,10 @@ export default function PublicLayout() {
           </div>
         </div>
       </header>
-      <main>
+      <main className="flex-1">
         <Outlet />
       </main>
+      <SiteFooter />
     </div>
   );
 }

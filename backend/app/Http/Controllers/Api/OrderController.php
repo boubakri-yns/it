@@ -45,20 +45,36 @@ class OrderController extends Controller
 
     public function myOrders(Request $request): JsonResponse
     {
-        return response()->json(
-            Order::query()
-                ->where('user_id', $request->user()->id)
-                ->with(['items.product', 'delivery', 'payment'])
-                ->latest()
-                ->get()
-        );
+        $orders = Order::query()
+            ->where('user_id', $request->user()->id)
+            ->with(['items.product', 'delivery', 'payment'])
+            ->orderBy('id')
+            ->get()
+            ->values()
+            ->map(function (Order $order, int $index) {
+                $order->setAttribute('display_number', $index + 1);
+
+                return $order;
+            })
+            ->sortByDesc('id')
+            ->values();
+
+        return response()->json($orders);
     }
 
     public function showMyOrder(Request $request, Order $order): JsonResponse
     {
         abort_unless($order->user_id === $request->user()->id, 403);
 
-        return response()->json($order->load(['items.product', 'delivery', 'payment']));
+        $order->load(['items.product', 'delivery', 'payment']);
+        $displayNumber = Order::query()
+            ->where('user_id', $request->user()->id)
+            ->where('id', '<=', $order->id)
+            ->count();
+
+        $order->setAttribute('display_number', $displayNumber);
+
+        return response()->json($order);
     }
 
     public function confirmReception(Request $request, Order $order): JsonResponse

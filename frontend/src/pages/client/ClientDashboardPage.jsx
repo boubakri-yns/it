@@ -10,6 +10,7 @@ export default function ClientDashboardPage() {
   const [orders, setOrders] = useState([]);
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const getOrderNumber = (order) => order?.display_number || order?.id;
 
   useEffect(() => {
     Promise.all([api.get('/my/orders'), api.get('/my/reservations')]).then(([ordersRes, reservationsRes]) => {
@@ -26,7 +27,7 @@ export default function ClientDashboardPage() {
       latestOrder
         ? {
             id: `order-${latestOrder.id}`,
-            title: `Commande #${latestOrder.id}`,
+            title: `Commande #${getOrderNumber(latestOrder)}`,
             detail: `${formatLabel(latestOrder.order_type)} - ${formatMoney(latestOrder.total)}`,
             meta: formatLabel(latestOrder.order_status),
             tone: statusTone(latestOrder.order_status),
@@ -85,7 +86,7 @@ export default function ClientDashboardPage() {
             <div className="rounded-[1.5rem] border border-charcoal/10 bg-charcoal p-5 text-cream">
               <div className="text-sm uppercase tracking-[0.24em] text-gold">Priorite</div>
               <div className="mt-3 text-xl font-semibold">
-                {latestOrder ? `Suivi de la commande #${latestOrder.id}` : 'Aucune commande en cours'}
+                {latestOrder ? `Suivi de la commande #${getOrderNumber(latestOrder)}` : 'Aucune commande en cours'}
               </div>
               <div className="mt-2 text-sm text-cream/75">
                 {latestOrder
@@ -130,7 +131,7 @@ export default function ClientDashboardPage() {
                 <div key={order.id} className="rounded-[1.5rem] border border-charcoal/10 p-5">
                   <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                     <div>
-                      <div className="font-semibold">Commande #{order.id}</div>
+                      <div className="font-semibold">Commande #{getOrderNumber(order)}</div>
                       <div className="mt-1 text-sm text-charcoal/65">
                         {formatLabel(order.order_type)} - {formatMoney(order.total)}
                       </div>
